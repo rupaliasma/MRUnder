@@ -84,7 +84,7 @@ def FolderRead(folder_path):
     dicom_names = reader.GetGDCMSeriesFileNames(folder_path)
     reader.SetFileNames(dicom_names)
     image = reader.Execute()
-    data = sitk.GetArrayFromImage(image).transpose([1,2,0])
+    data = sitk.GetArrayFromImage(image).transpose()#.transpose([1,2,0])
     if (np.shape(np.shape(data))[0] == 3): #If channel data not present
         data = np.expand_dims(data, 3)
     return data

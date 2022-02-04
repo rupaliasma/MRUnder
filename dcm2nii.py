@@ -9,12 +9,7 @@ import json
 
 root_original = r"D:\Hyperthermia_Data102\Sarkoma" #path where the DICOMs are
 nitfi_root = r"D:\Hyperthermia_Data102\Sarkoma_NII" #path where NITIs will be stored, split as mag and phase
-cmplx_nitfi_root = r"D:\Hyperthermia_Data102\Sarkoma_ComplexNII" #path where NITIs will be stored, combined as complex
-
-def dcm2nii(dicom_folder, nii_path):
-    data = FolderRead(dicom_folder).squeeze()
-    FileSave(data, nii_path)
-
+cmplx_im_root = r"D:\Hyperthermia_Data102\Sarkoma_ComplexNII" #path where NITIs will be stored, combined as complex
 
 mags = glob(f"{root_original}/**/MAG", recursive=True)
 idCounter = 0
@@ -39,9 +34,11 @@ for mag_path in tqdm(mags):
     FileSave(phavol, nii_path.replace("MAG", "PHA")+".nii.gz")
 
     complexvol = np.multiply(magvol, np.exp(1j*phavol))
-    nii_path_complex = new_mag_path.replace(root_original, cmplx_nitfi_root).replace(os.path.sep+"MAG", "")
+    nii_path_complex = new_mag_path.replace(root_original, cmplx_im_root).replace(os.path.sep+"MAG", "")
     os.makedirs(os.path.dirname(nii_path_complex), exist_ok=True)
-    FileSave(magvol, nii_path_complex+".nii.gz")
+
+    with open(nii_path_complex+".npy", 'wb') as f:
+        np.save(f, complexvol)
 
 with open(f"{root_original}/subIDs.json", 'w') as fp:
     json.dump(subIDs, fp)
