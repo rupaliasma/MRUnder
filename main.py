@@ -15,6 +15,7 @@ import scipy.io as sio
 import torchio as tio
 from scipy.signal import resample
 from tqdm import tqdm
+from skimage.transform import resize
 
 from CartesianUndersampling.Perform import performUndersampling as cartUnder
 from RadialUndersampling.Perform import performUndersampling as radUnder
@@ -61,6 +62,7 @@ recalculateUndersampling4Each = True
 staticSamplingFileName =  r'' #To be used if recalculateUndersampling4Each is set to False, to store the generated sampling pattern
 inputShape = (256,256) #This is a must have when not recalculating sampling patterns for each volume seperately. If recalculateUndersampling4Each set to True, then this is ignored. Also used when coil is not getting simulated for each
 croporpad = False
+interpolate = False
 fullySampledCropPaddedPath = ""#r'/run/media/soumick/Enterprise/Datasets/IXI/ISO_Resampled2T2/T1-BET-256'
 
 undersamplingType = 1 #Cartesian Samplings := 0: Varden1D, 1: Varden2D, 2: Uniform, 3: CenterMaskPercent, 4: CenterMaskIgnoreLines, 5: CenterRatioMask, 6: CenterSquareMask, 7: High-frequency Mask 
@@ -111,11 +113,14 @@ if not simulate4each :
 else:
     csm = None
 
-def _croppad(fullImgVol, inplane_size, fullpath_file_fully=None):
+def _croppad_interpolate(fullImgVol, inplane_size, fullpath_file_fully=None):
     if len(fullImgVol.shape) == 3 and len(inplane_size) == 2:
         inplane_size += (fullImgVol.shape[-1],)
-    cop = tio.transforms.CropOrPad(inplane_size)
-    fullImgVol = cop(np.expand_dims(fullImgVol,axis=0))[0]
+    if croporpad:
+        cop = tio.transforms.CropOrPad(inplane_size)
+        fullImgVol = cop(np.expand_dims(fullImgVol,axis=0))[0]
+    elif interpolate:
+        fullImgVol = resize(fullImgVol, inplane_size)
     if bool(fullySampledCropPaddedPath) and fullpath_file_fully is not None:
         fullpath_file_cop = fullpath_file_fully.replace(fullySampledPath, fullySampledCropPaddedPath)
         os.makedirs(os.path.dirname(fullpath_file_cop), exist_ok=True)
@@ -137,7 +142,7 @@ def _getCoilImages(fullImgVol, csm, fullpath_file_fully=None):
     if fullySampledCoilImgOutPath is not None and fullpath_file_fully is not None:
         fullpath_file_fullycoil = fullpath_file_fully.replace(fullySampledPath, fullySampledCoilImgOutPath)
         os.makedirs(os.path.dirname(fullpath_file_fullycoil), exist_ok=True)
-        if not np.iscomplex(fullImgVol):
+        if not np.iscomplexobj(fullImgVol):
             if NormWithABS:
                 coilVol = abs(coilVolComplex)
             else:
@@ -182,7 +187,7 @@ def _undersample(fullImgVol, fullpath_file_under):
                     underImgVol = cartUnder(fullImgVol, mask, zeropad=zeropadOutput)
                 else:
                     underImgVol = radUnder(fullImgVol, om, dcf, interpolationSize4NUFFT)
-        if not np.iscomplex(fullImgVol):
+        if not np.iscomplexobj(fullImgVol):
             if NormWithABS:
                 underImgVol = abs(underImgVol)
             else:
@@ -209,7 +214,7 @@ for type in types:
 for fullpath_file_fully in tqdm(files):
     with open(fullpath_file_fully, 'rb') as f:
         fullImgVol = np.load(f)
-    fullImgVol = _croppad(fullImgVol, inputShape, fullpath_file_fully) if croporpad else fullImgVol
+    fullImgVol = _croppad_interpolate(fullImgVol, inputShape, fullpath_file_fully) if croporpad or interpolate else fullImgVol
     if safeSliceUndersampling and fullImgVol.shape[-1] % sliceUndersamplingFactor != 0:
         print("Skipping as nSlice not divisable by slice undersampling factor")
         continue
@@ -232,7 +237,7 @@ for type in types:
 
 for fullpath_file_fully in tqdm(files):
     fullImgVol = FileRead(fullpath_file_fully).squeeze() #Squeeze to remove channel dim if only one channel
-    fullImgVol = _croppad(fullImgVol, inputShape, fullpath_file_fully) if croporpad else fullImgVol
+    fullImgVol = _croppad_interpolate(fullImgVol, inputShape, fullpath_file_fully) if croporpad or interpolate else fullImgVol
     if safeSliceUndersampling and fullImgVol.shape[-1] % sliceUndersamplingFactor != 0:
         print("Skipping as nSlice not divisable by slice undersampling factor")
         continue
@@ -270,7 +275,7 @@ for file in tqdm(files):
 
 for identifier, files in tqdm(dicoms.items()):
     fullImgVol = ListRead(files).squeeze() #Squeeze to remove channel dim if only one channel
-    fullImgVol = _croppad(fullImgVol, inputShape, fullpath_file_fully) if croporpad else fullImgVol
+    fullImgVol = _croppad_interpolate(fullImgVol, inputShape, fullpath_file_fully) if croporpad or interpolate else fullImgVol
     if safeSliceUndersampling and fullImgVol.shape[-1] % sliceUndersamplingFactor != 0:
         print("Skipping as nSlice not divisable by slice undersampling factor")
         continue
@@ -279,7 +284,7 @@ for identifier, files in tqdm(dicoms.items()):
     fullpath_file_under = fullpath_fully.replace(fullySampledPath, underSampledOutPath) + identifier + saveFileFormat
     os.makedirs(os.path.dirname(fullpath_file_under), exist_ok=True) #create directorries if doesnt exist
 
-    fullImgVol = _croppad(fullImgVol, inputShape, fullpath_file_fully) if croporpad else fullImgVol
+    fullImgVol = _croppad_interpolate(fullImgVol, inputShape, fullpath_file_fully) if croporpad or interpolate else fullImgVol
     if nCoilElements != 0:
         fullImgVol = _getCoilImages(fullImgVol, csm, fullpath_file_fully)
     _undersample(fullImgVol, fullpath_file_under)
