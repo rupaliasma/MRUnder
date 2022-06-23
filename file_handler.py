@@ -2,6 +2,14 @@ import SimpleITK as sitk
 import os
 import numpy as np
 import nibabel as nib
+from glob import glob
+
+def readNPYs(root):
+    files = sorted(glob(f"{root}/*.npy"))
+    ims = []
+    for f in files:
+        ims.append(np.load(f))
+    return np.array(ims).squeeze()
 
 def readDICOM_dynamic(root, return_meta=False):
     meta_obtained = False
@@ -91,6 +99,5 @@ def readDICOM_static(root, return_meta=False):
         return complex_image, ksp
 
 def saveNIFTI(array, save_path, filename):
-    array = np.transpose(array) 
     os.makedirs(save_path, exist_ok=True)
     nib.save(nib.Nifti1Image(array, np.eye(4)), os.path.join(save_path, filename))  
