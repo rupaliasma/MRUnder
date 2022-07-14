@@ -41,7 +41,7 @@ max_scan_no = None #Will be only used for DICOMs. Similar to the last one, itden
 underSampledOutPath = r'D:\Hyperthermia_Data102\SarkomaV1_ComplexNII_Under' #Root path to store the undersampled output
 outFolder = r'1DVarden25Mask' #Inside the underSampledOutPath, this folder will be created. Inside which the undersampled results will be stored
 zeropadOutput = True #By default set to True, when set to False doesn't zero pad the k-Space and decreases the pixel resolution of the output image. This should only be set True when using Cartesian CenterMasks
-keepOriginalFormat = False # [True/False] Will be only used for NIFTIs. Specifies whether to keep the original NIFTI extension (e.g. .img) or different file extension to be used while saving
+keepOriginalFormat = True # [True/False] Will be only used for NIFTIs. Specifies whether to keep the original NIFTI extension (e.g. .img) or different file extension to be used while saving
 saveFileFormat = '.nii.gz' # File extension to be used while saving the undersampled soutput. For NIFTIs, if keepOriginalFormat=True, then this will be ignored.
 nCoilElements = 0 # set it to zero if coil profile not needed
 
@@ -62,8 +62,8 @@ recalculateUndersampling4Each = True
 staticSamplingFileName =  r'' #To be used if recalculateUndersampling4Each is set to False, to store the generated sampling pattern
 inputShape = (256,256) #This is a must have when not recalculating sampling patterns for each volume seperately. If recalculateUndersampling4Each set to True, then this is ignored. Also used when coil is not getting simulated for each
 croporpad = False
-interpolate = False
-fullySampledCropPaddedPath = ""#r'/run/media/soumick/Enterprise/Datasets/IXI/ISO_Resampled2T2/T1-BET-256'
+interpolate = True
+fullySampledCropPaddedPath = r"/run/media/soumick/Enterprise/Datasets/IXI/ISO_Resampled2T2/BiLinear256/T1"#r'/run/media/soumick/Enterprise/Datasets/IXI/ISO_Resampled2T2/T1-BET-256'
 
 undersamplingType = 0 #Cartesian Samplings := 0: Varden1D, 1: Varden2D, 2: Uniform, 3: CenterMaskPercent, 4: CenterMaskIgnoreLines, 5: CenterRatioMask, 6: CenterSquareMask, 7: High-frequency Mask 
                       #Radial Samplings := 10: Golden Angle, 11: Equi-distance (Yet to be implimented)
@@ -96,7 +96,7 @@ else:
     if recalculateUndersampling4Each:
         inputShape = None
 
-    sampler = Sampler(undersamplingType, percentOfKSpace, stepsize, lines2ignore, maxAmplitude4PDF, ROdir, noOfSpokes, fullresSpokesMulFactor, interpolationSize4NUFFT, inputShape)
+    sampler = Sampler(undersamplingType, percentOfKSpace, centrePercent, stepsize, lines2ignore, maxAmplitude4PDF, ROdir, noOfSpokes, fullresSpokesMulFactor, interpolationSize4NUFFT, inputShape)
     isRadial = sampler.isRadial
 
     if not recalculateUndersampling4Each:
