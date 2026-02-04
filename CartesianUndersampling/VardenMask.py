@@ -16,14 +16,7 @@ import math
 from scipy.stats import norm
 from scipy.stats import multivariate_normal as mvn
 
-__author__ = "Mariio Breitkopf, Soumick Chatterjee"
-__copyright__ = "Copyright 2019, Mario Breitkopf, Soumick Chatterjee & OvGU:ESF:MEMoRIAL"
-__credits__ = ["Mariio Breitkopf", "Soumick Chatterjee"]
 
-__license__ = "GPL"
-__version__ = "0.0.1"
-__email__ = "soumick.chatterjee@ovgu.de"
-__status__ = "Finished"
 
 def createVardenMask1D(slice, percent, maxAmplitude4PDF, ROdir, returnPDF=False):  
     mask = np.zeros(slice.shape)
@@ -189,4 +182,5 @@ def createVardenMask2Dv0(slice, percent, returnPDF=False):
     if returnPDF:
         return mask, PDF
     else:
+
         return mask
