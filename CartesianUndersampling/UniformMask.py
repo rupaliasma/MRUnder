@@ -6,14 +6,7 @@ This module generates Uniform sampling mask (like that is used in Grappa)
 
 import numpy as np
 
-__author__ = "Mariio Breitkopf, Soumick Chatterjee"
-__copyright__ = "Copyright 2019, Mario Breitkopf, Soumick Chatterjee & OvGU:ESF:MEMoRIAL"
-__credits__ = ["Mariio Breitkopf", "Soumick Chatterjee"]
 
-__license__ = "GPL"
-__version__ = "0.0.1"
-__email__ = "soumick.chatterjee@ovgu.de"
-__status__ = "Finished"
 
 def createUniformMask(slice, stepsize, ROdir, returnPercent=False):
     mask = np.zeros(slice.shape)
@@ -40,5 +33,6 @@ def _maskForROdir(mask, stepsize, ROdir):
         mask[B==1,:] = 1
     else: #ROdir == 1:
         mask[:,B==1] = 1
+
 
     return mask
