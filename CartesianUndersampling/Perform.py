@@ -10,14 +10,7 @@ import scipy.io as sio
 import numpy as np
 from utils.FrequencyTransforms import fft2c, ifft2c
 
-__author__ = "Soumick Chatterjee"
-__copyright__ = "Copyright 2019, Soumick Chatterjee & OvGU:ESF:MEMoRIAL"
-__credits__ = ["Soumick Chatterjee"]
 
-__license__ = "GPL"
-__version__ = "0.0.1"
-__email__ = "soumick.chatterjee@ovgu.de"
-__status__ = "Finished"
 
 def performUndersampling(fullImgVol, mask=None, maskmatpath=None, zeropad=True):
     #Either send mask, or maskmatpath.
@@ -47,4 +40,5 @@ def performUndersamplingKSP(fullKSPVol, mask=None, maskmatpath=None, zeropad=Tru
             if maskline.any():
                 underKSPVol.append(temp[:,i,...])
         underKSPVol = np.array(underKSPVol).swapaxes(0,1)
+
     return underKSPVol
