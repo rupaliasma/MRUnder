@@ -12,14 +12,7 @@ Undersampling codes:-
 
 import numpy as np
 
-__author__ = "Soumick Chatterjee"
-__copyright__ = "Copyright 2019, Soumick Chatterjee & OvGU:ESF:MEMoRIAL"
-__credits__ = ["Soumick Chatterjee"]
 
-__license__ = "GPL"
-__version__ = "0.0.1"
-__email__ = "soumick.chatterjee@ovgu.de"
-__status__ = "Finished"
 
 def createCenterMaskPercent(slice, percent):
     mask = np.ones(slice.shape)
@@ -119,4 +112,5 @@ def createCenterSquareMask(slice, percent, returnNumLinesRemoved=False):
     if returnNumLinesRemoved:
         return mask, (linesRemoved_dim1, linesRemoved_dim2)
     else:
+
         return mask
